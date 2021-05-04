@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,9 +34,10 @@ public class DemoApplication {
         private static Logger log = LoggerFactory.getLogger(SimpleRestController.class);
         private final RestTemplate restTemplate;
 
-        SimpleRestController(RestTemplate restTemplate) {
-            this.restTemplate = restTemplate;
+        SimpleRestController(RestTemplateBuilder restTemplateBuilder) {
+            this.restTemplate = restTemplateBuilder.build();;
         }
+
 
         @Value("${APP_NAME}")
         private String appName;
