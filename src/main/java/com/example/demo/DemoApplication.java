@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,27 +34,27 @@ public class DemoApplication {
         private static Logger log = LoggerFactory.getLogger(SimpleRestController.class);
         private final RestTemplate restTemplate;
 
-        SimpleRestController(RestTemplate restTemplate) {
-            this.restTemplate = restTemplate;
+        SimpleRestController(RestTemplateBuilder restTemplateBuilder) {
+            this.restTemplate = restTemplateBuilder.build();
         }
 
         @Value("${APP_NAME}")
         private String appName;
 
         @GetMapping("/a")
-        String a(@RequestHeader(name="Authorization") String authToken) {
+        String a(@RequestHeader(name = "Authorization") String authToken) {
 
             log.info("Handling a - " + appName);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", authToken );
+            headers.add("Authorization", authToken);
             HttpEntity request = new HttpEntity(headers);
 
             ResponseEntity<String> response = restTemplate.exchange(
-                    "http://localhost:8082/b",
-                    HttpMethod.GET,
-                    request,
-                    String.class
+                "http://localhost:8082/b",
+                HttpMethod.GET,
+                request,
+                String.class
             );
 
             String result = response.getBody();
@@ -63,7 +64,7 @@ public class DemoApplication {
         }
 
         @GetMapping("/b")
-        String b(@RequestHeader(name="Authorization") String authToken) {
+        String b(@RequestHeader(name = "Authorization") String authToken) {
             log.info("Handling b - " + appName);
             return "Hello from /b - " + appName;
         }
