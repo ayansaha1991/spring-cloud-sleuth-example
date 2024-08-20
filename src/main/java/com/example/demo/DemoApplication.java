@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,12 +8,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -33,21 +34,22 @@ public class DemoApplication {
 
         private static Logger log = LoggerFactory.getLogger(SimpleRestController.class);
         private final RestTemplate restTemplate;
+        private final MongoTemplate mongoTemplate;
 
-        SimpleRestController(RestTemplateBuilder restTemplateBuilder) {
+        SimpleRestController(RestTemplateBuilder restTemplateBuilder, MongoTemplate mongoTemplate) {
             this.restTemplate = restTemplateBuilder.build();
+            this.mongoTemplate = mongoTemplate;
         }
 
-        @Value("${APP_NAME}")
+        @Value("${spring.application.name}")
         private String appName;
 
         @GetMapping("/a")
-        String a(@RequestHeader(name = "Authorization") String authToken) {
+        String a() {
 
             log.info("Handling a - " + appName);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", authToken);
             HttpEntity request = new HttpEntity(headers);
 
             ResponseEntity<String> response = restTemplate.exchange(
@@ -64,8 +66,10 @@ public class DemoApplication {
         }
 
         @GetMapping("/b")
-        String b(@RequestHeader(name = "Authorization") String authToken) {
+        String b() {
             log.info("Handling b - " + appName);
+            Document document = new Document("test", "data");
+            mongoTemplate.insert(document, "tracing-poc");
             return "Hello from /b - " + appName;
         }
     }
